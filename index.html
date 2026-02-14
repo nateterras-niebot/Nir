@@ -3,49 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Haunted Dorm LAN PRO - GitHub Edition</title>
+    <title>Haunted Dorm LAN PRO</title>
     <script src="https://unpkg.com"></script>
     <style>
         :root { --wall: #1a1a2e; --floor: #16213e; --player: #00d2ff; --p2: #2ecc71; --hunter: #ff4757; }
         body { margin: 0; background: #000; overflow: hidden; font-family: 'Segoe UI', sans-serif; color: white; touch-action: none; user-select: none; }
         
-        /* MENU */
+        /* --- INTERFEJSY --- */
         #menu { position: fixed; inset: 0; background: radial-gradient(circle, #1e3799, #0a0a1a); z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .box { background: rgba(0,0,0,0.6); padding: 25px; border-radius: 20px; border: 2px solid var(--player); margin: 10px; width: 300px; text-align: center; }
         .btn-m { width: 100%; padding: 15px; background: var(--player); border: none; color: #000; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         input { width: 85%; padding: 12px; margin-top: 10px; border-radius: 8px; border: none; text-align: center; font-size: 16px; }
 
-        /* HUD */
         #game-ui { display: none; position: fixed; top: 15px; left: 15px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 12px; border: 2px solid var(--player); z-index: 1000; }
         #btn-shop-open { position: fixed; top: 15px; right: 15px; padding: 15px; background: gold; color: black; border: none; border-radius: 10px; font-weight: bold; z-index: 1000; }
+        
+        #shop-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; max-width: 350px; background: #1a1a2e; border: 3px solid gold; padding: 20px; border-radius: 20px; z-index: 6000; }
+        .shop-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #333; }
+
         #action-btn { display: none; position: fixed; bottom: 230px; left: 50%; transform: translateX(-50%); padding: 18px 40px; background: #e94560; color: white; border-radius: 15px; font-weight: bold; border: none; z-index: 2000; box-shadow: 0 0 20px #e94560; }
 
-        /* SWIAT */
+        /* --- ŚWIAT GRY --- */
         #viewport { width: 100vw; height: 100vh; overflow: hidden; position: relative; display: none; }
         #map { width: 5000px; height: 5000px; background: var(--floor); position: absolute; background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 50px 50px; }
 
-        .room { position: absolute; border: 12px solid var(--wall); background: rgba(0,0,0,0.4); border-radius: 15px; }
+        .room { position: absolute; border: 12px solid var(--wall); background: rgba(0,0,0,0.4); border-radius: 15px; transition: 0.3s; }
         .bed { width: 60px; height: 90px; background: #3c40c6; position: absolute; top: 25px; left: 25px; border-radius: 5px; border-bottom: 20px solid #fff; }
         .turret { width: 35px; height: 35px; background: #ffa502; position: absolute; border-radius: 50%; border: 3px solid #000; z-index: 10; box-shadow: 0 0 10px orange; }
-        .bullet { width: 10px; height: 10px; background: gold; position: absolute; border-radius: 50%; z-index: 100; }
+        .bullet { width: 10px; height: 10px; background: gold; position: absolute; border-radius: 50%; z-index: 100; box-shadow: 0 0 8px gold; }
 
-        .ent { width: 50px; height: 50px; border-radius: 50%; position: absolute; z-index: 100; display: flex; justify-content: center; align-items: center; font-size: 24px; }
+        .ent { width: 50px; height: 50px; border-radius: 50%; position: absolute; z-index: 100; display: flex; justify-content: center; align-items: center; font-size: 24px; transition: transform 0.1s; }
         #p-local { background: var(--player); box-shadow: 0 0 20px var(--player); }
         #p-remote { background: var(--p2); box-shadow: 0 0 20px var(--p2); display: none; }
-        .bot { background: var(--bot); }
-        .hunter { background: var(--hunter); border: 2px solid white; z-index: 110; }
+        .bot { background: var(--bot); box-shadow: 0 0 15px var(--bot); }
+        .hunter { background: var(--hunter); box-shadow: 0 0 35px var(--hunter); border: 2px solid white; z-index: 110; }
+
+        .hp-cont { width: 60px; height: 8px; background: #500; position: absolute; top: -20px; border-radius: 4px; overflow: hidden; }
+        .hp-fill { width: 100%; height: 100%; background: #f00; }
 
         #controls { position: fixed; bottom: 30px; left: 30px; display: grid; grid-template-columns: repeat(3, 75px); gap: 12px; z-index: 2000; }
-        .ctrl { width: 75px; height: 75px; background: rgba(255,255,255,0.1); border: 2px solid #fff; border-radius: 20px; display: flex; justify-content: center; align-items: center; font-size: 32px; }
+        .ctrl { width: 75px; height: 75px; background: rgba(255,255,255,0.1); border: 2px solid #fff; border-radius: 20px; display: flex; justify-content: center; align-items: center; font-size: 32px; color: white; }
     </style>
 </head>
 <body>
 
 <div id="menu">
-    <h1>HAUNTED DORM LAN</h1>
+    <h1 style="font-size: 3em; color: var(--player);">DORM LAN PRO</h1>
     <div class="box">
-        <p>Twoje ID: <b id="my-id" style="color: gold;">Łączenie...</b></p>
-        <button class="btn-m" onclick="startHost()">HOSTUJ GRĘ</button>
+        <p>Twoje ID: <b id="my-id" style="color: gold;">Czekaj...</b></p>
+        <button class="btn-m" onclick="startHost()">STWÓRZ SERWER LAN</button>
     </div>
     <div class="box">
         <input type="text" id="join-id" placeholder="Wpisz ID Hosta">
@@ -54,11 +60,21 @@
 </div>
 
 <div id="game-ui">Kasa: <span id="ui-cash" style="color:gold">0</span> $<br>Zysk: <span id="ui-inc">10</span>/s</div>
-<button id="btn-shop-open" onclick="alert('Sklep: Buduj wieże w pokoju!')">🛒 INFO</button>
-<button id="action-btn" onclick="handleAction()">WSTAŃ / BUDUJ (200$)</button>
+<button id="btn-shop-open" onclick="toggleShop()">🛒 SKLEP</button>
+
+<div id="shop-modal">
+    <h2 style="text-align:center">Sklep</h2>
+    <div id="shop-list"></div>
+    <button class="btn-m" onclick="toggleShop()" style="background:#555; color:white;">ZAMKNIJ</button>
+</div>
+
+<button id="action-btn" onclick="handleAction()">WSTAŃ / BUDUJ</button>
 
 <div id="viewport">
-    <div id="map"><div id="p-local" class="ent">👀</div><div id="p-remote" class="ent">🧤</div></div>
+    <div id="map">
+        <div id="p-local" class="ent">👀</div>
+        <div id="p-remote" class="ent">🧤</div>
+    </div>
 </div>
 
 <div id="controls">
@@ -71,8 +87,154 @@
 <script>
     const peer = new Peer();
     let conn, isHost = false, rooms = [], bots = [], bullets = [];
-    let state = { x: 400, y: 400, cash: 0, inc: 10, speed: 8, sleeping: false, rIdx: -1 };
-    let move = { u:0, d:0, l:0, r:0 };
+    let state = { x: 400, y: 400, cash: 0, inc: 10, speed: 8, sleeping: false, roomIdx: -1 };
+    let remotePos = { x: 0, y: 0 }, move = { u:0, d:0, l:0, r:0 };
+    let hunter = { x: 3000, y: 3000, hp: 100, el: null };
+
+    peer.on('open', id => document.getElementById('my-id').innerText = id);
+
+    function startHost() { isHost = true; peer.on('connection', c => { conn = c; syncConn(); initGame(); }); }
+    function startClient() { conn = peer.connect(document.getElementById('join-id').value); syncConn(); initGame(); }
+
+    function syncConn() {
+        conn.on('data', d => {
+            if(d.type==='p') { remotePos = {x:d.x, y:d.y}; updateRemote(); }
+            if(d.type==='b') buildTurret(d.idx, false);
+            if(d.type==='h') { hunter.hp = d.hp; document.getElementById('h-hp').style.width = d.hp+'%'; }
+        });
+    }
+
+    function initGame() {
+        document.getElementById('menu').style.display = 'none';
+        document.getElementById('viewport').style.display = 'block';
+        for(let i=0; i<12; i++) {
+            const rx = (i%4)*800+300, ry = Math.floor(i/4)*800+300;
+            const rEl = document.createElement('div'); rEl.className = 'room';
+            rEl.style.cssText = `left:${rx}px; top:${ry}px; width:350px; height:350px;`;
+            const bed = document.createElement('div'); bed.className = 'bed';
+            rEl.appendChild(bed); document.getElementById('map').appendChild(rEl);
+            rooms.push({ x:rx, y:ry, turrets: 0, bed: bed, owner: null });
+        }
+        spawnHunter(); spawnBots();
+        const bnd = (id,k) => { 
+            const e = document.getElementById(id);
+            e.onmousedown = e.ontouchstart = () => { if(!state.sleeping) move[k]=1; };
+            e.onmouseup = e.ontouchend = () => move[k]=0;
+        };
+        bnd('u','u'); bnd('d','d'); bnd('l','l'); bnd('r','r');
+        requestAnimationFrame(loop);
+    }
+
+    function spawnHunter() {
+        hunter.el = document.createElement('div'); hunter.el.className = 'ent hunter'; hunter.el.innerText = "👹";
+        hunter.el.innerHTML += '<div class="hp-cont"><div class="hp-fill" id="h-hp"></div></div>';
+        document.getElementById('map').appendChild(hunter.el);
+    }
+
+    function spawnBots() {
+        for(let i=0; i<4; i++) {
+            const el = document.createElement('div'); el.className = 'ent bot'; el.innerText = "🤖";
+            document.getElementById('map').appendChild(el);
+            bots.push({ el, x: 2000, y: 2000, room: rooms[i+5], sleeping: false, cash: 0 });
+        }
+    }
+
+    function loop() {
+        if(!state.sleeping) {
+            state.x += (move.r - move.l) * state.speed; state.y += (move.d - move.u) * state.speed;
+            const lp = document.getElementById('p-local');
+            lp.style.left = state.x+'px'; lp.style.top = state.y+'px';
+            document.getElementById('map').style.transform = `translate(${-state.x + window.innerWidth/2}px, ${-state.y + window.innerHeight/2}px)`;
+            rooms.forEach((r,i) => {
+                const bR = r.bed.getBoundingClientRect(), pR = lp.getBoundingClientRect();
+                if(pR.left < bR.right && pR.right > bR.left && pR.top < bR.bottom && pR.bottom > bR.top && !r.owner) {
+                    state.sleeping = true; state.roomIdx = i; r.owner = 'me';
+                    document.getElementById('action-btn').style.display = 'block';
+                }
+            });
+        }
+
+        if(isHost) { // Hunter goni hosta
+            const dx = state.x - hunter.x, dy = state.y - hunter.y, dist = Math.sqrt(dx*dx+dy*dy);
+            if(dist > 10) { hunter.x += dx/dist*4; hunter.y += dy/dist*4; }
+            hunter.el.style.left = hunter.x+'px'; hunter.el.style.top = hunter.y+'px';
+        }
+
+        rooms.forEach((r, idx) => {
+            if(r.turrets > 0 && Math.random() < 0.05) {
+                const dx = hunter.x - (r.x+150), dy = hunter.y - (r.y+150);
+                if(Math.sqrt(dx*dx+dy*dy) < 600) fire(r.x+150, r.y+150);
+            }
+        });
+
+        bullets.forEach((b, i) => {
+            b.x += b.vx; b.y += b.vy; b.el.style.left = b.x+'px'; b.el.style.top = b.y+'px';
+            if(Math.sqrt((b.x-hunter.x)**2 + (b.y-hunter.y)**2) < 40) {
+                hunter.hp -= 1; b.life = 0;
+                document.getElementById('h-hp').style.width = hunter.hp+'%';
+                if(conn) conn.send({type:'h', hp: hunter.hp});
+                if(hunter.hp <= 0) { hunter.hp=100; hunter.x=3500; hunter.y=3500; state.cash+=500; }
+            }
+            if(--b.life <= 0) { b.el.remove(); bullets.splice(i,1); }
+        });
+
+        bots.forEach(b => {
+            if(!b.sleeping) {
+                const dx = (b.room.x+50)-b.x, dy = (b.room.y+50)-b.y, dist = Math.sqrt(dx*dx+dy*dy);
+                if(dist>5) { b.x += dx/dist*4; b.y += dy/dist*4; } else { b.sleeping = true; b.room.owner = 'bot'; }
+            } else {
+                b.cash += 0.5; if(b.cash >= 200 && b.room.turrets < 5) { b.cash -= 200; buildTurret(rooms.indexOf(b.room), false); }
+            }
+            b.el.style.left = b.x+'px'; b.el.style.top = b.y+'px';
+        });
+
+        if(conn && conn.open) conn.send({ type: 'p', x: state.x, y: state.y });
+        requestAnimationFrame(loop);
+    }
+
+    function fire(sx, sy) {
+        const el = document.createElement('div'); el.className = 'bullet';
+        document.getElementById('map').appendChild(el);
+        const ang = Math.atan2(hunter.y-sy, hunter.x-sx);
+        bullets.push({ el, x:sx, y:sy, vx:Math.cos(ang)*18, vy:Math.sin(ang)*18, life:50 });
+    }
+
+    function handleAction() {
+        if(state.cash >= 200) {
+            state.cash -= 200; state.inc += 40;
+            buildTurret(state.roomIdx, true);
+        } else { state.sleeping = false; rooms[state.roomIdx].owner = null; state.y += 150; document.getElementById('action-btn').style.display = 'none'; }
+    }
+
+    function buildTurret(idx, send) {
+        const r = rooms[idx]; const t = document.createElement('div'); t.className = 'turret';
+        t.style.left = (r.turrets * 45 + 80) + 'px'; t.style.top = '150px';
+        r.bed.parentElement.appendChild(t); r.turrets++;
+        if(send && conn) conn.send({ type: 'b', idx: idx });
+    }
+
+    function toggleShop() {
+        const m = document.getElementById('shop-modal'); m.style.display = m.style.display === 'block' ? 'none' : 'block';
+        document.getElementById('shop-list').innerHTML = `
+            <div class="shop-item">Super Materac (500$) <button onclick="buy(500,60,0)">KUP</button></div>
+            <div class="shop-item">Buty Turbo (400$) <button onclick="buy(400,0,5)">KUP</button></div>
+            <div class="shop-item">Złota Wieża (1000$) <button onclick="buy(1000,150,0)">KUP</button></div>
+        `;
+    }
+
+    window.buy = (c, inc, spd) => {
+        if(state.cash >= c) { state.cash -= c; state.inc += inc; state.speed += spd; } else alert("Mało kasy!");
+    }
+
+    function updateRemote() {
+        const rp = document.getElementById('p-remote'); rp.style.display = 'flex';
+        rp.style.left = remotePos.x+'px'; rp.style.top = remotePos.y+'px';
+    }
+
+    setInterval(() => { if(state.sleeping) { state.cash += state.inc; document.getElementById('ui-cash').innerText = state.cash; document.getElementById('ui-inc').innerText = state.inc; } }, 1000);
+</script>
+</body>
+</html>
     let hunter = { x: 3000, y: 3000, hp: 100, el: null };
 
     peer.on('open', id => document.getElementById('my-id').innerText = id);
